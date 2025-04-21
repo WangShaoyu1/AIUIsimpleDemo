@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AIUISimpleDemo</string>
+    <string name="voice_clone_instruction">使用说明：\n
+        1.录制一段20~40秒的音频保存到文件，格式为24KHz采样，16bit编码的PCM；\n
+        2.调用注册接口将音频上传到云端注册，注册成功后会返回一个对应的声音res_id；\n
+        3.调用语音合成时，在参数中携带声音res_id就可以得到对应音色的音频。
+    </string>
+    <string name="voice_clone_script">月光如流水一般，静静地泻在这一片叶子和花上。薄薄的青雾浮起在荷塘里。叶子和花仿佛在牛乳中洗过一样；又像笼着轻纱的梦。虽然是满月，天上却有一层淡淡的云，所以不能朗照；但我以为这恰是到了好处——酣眠固不可少，小睡也别有风味的。</string>
+</resources>

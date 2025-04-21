@@ -1,0 +1,64 @@
+apply plugin: 'com.android.application'
+ext {
+    support_ver = '28.0.0'
+}
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion '29.0.2'
+    defaultConfig {
+        applicationId "com.iflytek.aiui.demo.simple"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 36
+        versionName "1.5.5"
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "AIUISimpleDemo-${variant.versionName}-${variant.buildType.name}.apk"
+        }
+    }
+
+    dexOptions {
+        jumboMode true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets', '../../../assets']
+            jniLibs.srcDirs = ['src/main/jniLibs', '../../../libs']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../libs', include: ['*.jar'])
+
+    //support������
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+}
+
+

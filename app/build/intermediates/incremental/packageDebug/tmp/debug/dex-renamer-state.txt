@@ -1,0 +1,4 @@
+#Fri Apr 18 18:30:28 GMT+08:00 2025
+base.0=C\:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_voice_clone.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\activity_voice_clone.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_layout_privacy_dialog.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\layout_privacy_dialog.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_web_view.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\activity_web_view.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\xml_network_security_config.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\xml\\network_security_config.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_nlp_demo.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\activity_nlp_demo.xml"
+    },
+    {
+        "merged": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\build\\intermediates\\res\\merged\\debug\\layout_nlpdemo.xml.flat",
+        "source": "C:\\Users\\18672\\Downloads\\Android_aiui\\sample\\AIUISimpleDemo\\app\\src\\main\\res\\layout\\nlpdemo.xml"
+    }
+]
