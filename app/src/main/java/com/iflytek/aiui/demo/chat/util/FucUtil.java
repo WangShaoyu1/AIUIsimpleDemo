@@ -1,3 +1,6 @@
+// 由于不清楚具体项目结构和构建工具，推测此问题可能是项目配置导致类路径未包含该文件。
+// 若使用 Gradle 构建项目，可检查 app 模块的 build.gradle 文件，确保源文件目录配置正确。
+// 此代码本身无需修改，保持原样即可。
 package com.iflytek.aiui.demo.chat.util;
 
 import android.content.Context;

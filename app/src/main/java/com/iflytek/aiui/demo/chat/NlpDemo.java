@@ -64,9 +64,9 @@ public class NlpDemo extends Activity implements OnClickListener {
     @SuppressLint("ShowToast")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.nlpdemo);
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         initLayout();
 
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);

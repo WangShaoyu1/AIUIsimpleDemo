@@ -52,14 +52,15 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     @SuppressLint("ShowToast")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_nlp_demo);
 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         initUI();
     }
 
     private void initUI() {
-        mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
+        // 防止多次创建Toast对象，后面通过setText显示文字，show显示Toast
+        mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT); 
 
         findViewById(R.id.nlp_create).setOnClickListener(NlpDemoActivity.this);
         findViewById(R.id.nlp_destroy).setOnClickListener(NlpDemoActivity.this);
@@ -141,7 +142,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         String params = FucUtil.readAssetFile(this, "cfg/aiui_phone.cfg", "utf-8");
 
         try {
-            JSONObject paramsJson = new JSONObject(params);
+            JSONObject paramsJson = new JSONObject(params);//将字符串解析为JSON对象
 
             mIsWakeupEnable = !"off".equals(paramsJson.optJSONObject("speech").optString(
                     "wakeup_mode"));

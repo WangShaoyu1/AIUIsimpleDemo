@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 初始化按钮点击事件
         findViewById(R.id.btn_nlp_demo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +55,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
+        // 检查隐私政策
         if (!SharedPrefUtil.isPrivacyPolicyAgreed(MainActivity.this)) {
             showPrivacyPolicyDialog();
         }

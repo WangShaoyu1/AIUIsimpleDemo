@@ -26,17 +26,17 @@ public class FucUtil {
         String result = "";
 
         try {
-            InputStream in = context.getAssets().open(file);
-            len = in.available();
-            buf = new byte[len];
-            in.read(buf, 0, len);
+            InputStream in = context.getAssets().open(file);//打开文件流
+            len = in.available();//获取文件大小
+            buf = new byte[len];//创建缓冲区
+            in.read(buf, 0, len);//读取文件到缓冲区
 
-            result = new String(buf, code);
+            result = new String(buf, code);//将字节数据转换为字符串
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return result;
+        return result;//返回结果
     }
 
     /**

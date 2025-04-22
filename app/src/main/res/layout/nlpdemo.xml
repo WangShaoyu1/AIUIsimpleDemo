@@ -94,7 +94,7 @@
     
      <Button
             android:id="@+id/text_nlp_start"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="文本语义"
             android:layout_marginLeft ="10dip"
