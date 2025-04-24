@@ -25,11 +25,13 @@ import com.iflytek.aiui.Version;
 import com.iflytek.aiui.demo.chat.utils.DeviceUtil;
 import com.iflytek.aiui.demo.chat.utils.FucUtil;
 import com.iflytek.aiui.demo.chat.utils.PermissionUtil;
+import com.iflytek.aiui.demo.chat.utils.FileLogger;
 import com.iflytek.aiui.demo.chat.utils.tts.StreamNlpTtsHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -52,15 +54,15 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     @SuppressLint("ShowToast")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nlp_demo);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        setContentView(R.layout.activity_nlp_demo);
         initUI();
     }
 
     private void initUI() {
         // 防止多次创建Toast对象，后面通过setText显示文字，show显示Toast
-        mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT); 
+        mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
 
         findViewById(R.id.nlp_create).setOnClickListener(NlpDemoActivity.this);
         findViewById(R.id.nlp_destroy).setOnClickListener(NlpDemoActivity.this);
@@ -162,20 +164,20 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     }
 
     private void createAgent() {
-        if (checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtil.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CODE);
+        // checkCallingOrSelfPermission是Activity类的一个方法，用于检查当前应用是否拥有指定的权限，它接收一个权限字符串作为参数，并返回一个整数值
+        // Mainfest.permission 是Android系统中用于管理权限的类，WRITE_EXTERNAL_STORAGE是该类的一个常量，表示写入外部存储的权限
+        // PackageManager是Android系统中用于管理应用包信息的类，PERMISSION_GRANTED是该类的一个常量，表示权限已被授予。
+        if (checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            PermissionUtil.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
             return;
         }
 
         if (null == mAIUIAgent) {
-            Log.i(TAG, "createAgent");
+            FileLogger.i(TAG, "createAgent");
 
             // 为每一个设备设置对应唯一的SN（最好使用设备硬件信息(mac地址，设备序列号等）生成），以便正确统计装机量，避免刷机或者应用卸载重装导致装机量重复计数
             String deviceId = DeviceUtil.getDeviceId(this);
-            Log.i(TAG, "deviceId=" + deviceId);
+            FileLogger.i(TAG, "deviceId=" + deviceId);
 
             AIUISetting.setNetLogLevel(AIUISetting.LogLevel.debug);
             AIUISetting.setSystemInfo(AIUIConstant.KEY_SERIAL_NUM, deviceId);
@@ -199,7 +201,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
     private void destroyAgent() {
         if (null != mAIUIAgent) {
-            Log.i(TAG, "destroyAgent");
+            FileLogger.i(TAG, "destroyAgent");
 
             mAIUIAgent.destroy();
             mAIUIAgent = null;
@@ -214,20 +216,17 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             return;
         }
 
-        if (checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            PermissionUtil.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
-                    REQUEST_CODE);
+        if (checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            PermissionUtil.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
             return;
         }
 
-        Log.i(TAG, "startVoiceNlp");
+        FileLogger.i(TAG, "startVoiceNlp");
 
         mNlpText.setText("");
 
         // 先发送唤醒消息，改变AIUI内部状态，只有唤醒状态才能接收语音输入
-        // 默认为oneshot模式，即一次唤醒后就进入休眠。可以修改aiui_phone.cfg中speech参数的interact_mode为continuous以支持持续交互
+        // 默认为oneshot模式，即一次唤醒后就进入休眠。可以修改aiui_phone.cfg中speech参数的 interact_mode 为continuous以支持持续交互
         if (!mIsWakeupEnable) {
             AIUIMessage wakeupMsg = new AIUIMessage(AIUIConstant.CMD_WAKEUP, 0, 0, "", null);
             mAIUIAgent.sendMessage(wakeupMsg);
@@ -238,7 +237,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         // 在输入参数中设置tag，则对应结果中也将携带该tag，可用于关联输入输出
         String params = "sample_rate=16000,data_type=audio,pers_param={\"uid\":\"\"},tag=audio-tag";
         AIUIMessage startRecord = new AIUIMessage(AIUIConstant.CMD_START_RECORD, 0, 0, params,
-				null);
+                null);
 
         mAIUIAgent.sendMessage(startRecord);
     }
@@ -249,7 +248,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             return;
         }
 
-        Log.i(TAG, "stopVoiceNlp");
+        FileLogger.i(TAG, "stopVoiceNlp");
 
         // 停止录音
         String params = "sample_rate=16000,data_type=audio";
@@ -258,13 +257,14 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         mAIUIAgent.sendMessage(stopRecord);
     }
 
+    // 语义合成
     private void startTextNlp() {
         if (null == mAIUIAgent) {
             showTip("AIUIAgent 为空，请先创建");
             return;
         }
 
-        Log.i(TAG, "startTextNlp");
+        FileLogger.i(TAG, "startTextNlp");
 
         AIUIMessage wakeupMsg = new AIUIMessage(AIUIConstant.CMD_WAKEUP, 0, 0, "", null);
         mAIUIAgent.sendMessage(wakeupMsg);
@@ -452,7 +452,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     private final AIUIListener mAIUIListener = new AIUIListener() {
         @Override
         public void onEvent(AIUIEvent event) {
-            Log.i(TAG, "onEvent, eventType=" + event.eventType);
+            FileLogger.i(TAG, "onEvent, eventType=" + event.eventType);
 
             switch (event.eventType) {
                 case AIUIConstant.EVENT_CONNECTED_TO_SERVER:
@@ -484,6 +484,13 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                             String cnt_id = content.getString("cnt_id");
                             String cntStr = new String(event.data.getByteArray(cnt_id), "utf-8");
 
+                            // 打印识别结果到日志
+                            FileLogger.i(TAG, "onEvent, eventType=" + event.eventType);
+                            FileLogger.i(TAG, "sub = " + sub);
+                            FileLogger.i(TAG, "sid = " + sid);
+                            FileLogger.i(TAG, "tag = " + tag);
+                            FileLogger.i(TAG, "cntStr = " + cntStr);
+
                             // 获取从数据发送完到获取结果的耗时，单位：ms
                             // 也可以通过键名"bos_rslt"获取从开始发送数据到获取结果的耗时
                             long eosRsltTime = event.data.getLong("eos_rslt", -1);
@@ -506,7 +513,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                             if ("nlp".equals(sub)) {
                                 // 解析得到语义结果
                                 String resultStr = cntJson.optString("intent");
-                                Log.i(TAG, resultStr);
+                                FileLogger.i(TAG, resultStr);
                             }
 
                             mNlpText.append("\n");
@@ -625,7 +632,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                             break;
 
                             case AIUIConstant.SYNC_DATA_DOWNLOAD: {
-                                if (AIUIConstant.SUCCESS == retCode ) {
+                                if (AIUIConstant.SUCCESS == retCode) {
                                     String base64 = event.data.getString("text", "");
                                     String content = new String(Base64.decode(base64,
                                             Base64.DEFAULT));
@@ -633,7 +640,8 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
                                     mNlpText.setText(text);
                                 }
-                            } break;
+                            }
+                            break;
                         }
                     } else if (AIUIConstant.CMD_QUERY_SYNC_STATUS == event.arg1) {    // 数据同步状态查询的返回
                         // 获取同步类型
@@ -664,6 +672,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         }
     }
 
+    // 在Android中，更新UI操作必须在UI线程上进行，否则会抛出异常
     private void showTip(final String str) {
         runOnUiThread(new Runnable() {
 
@@ -703,19 +712,19 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     private final StreamNlpTtsHelper.Listener mStreamNlpTtsListener = new StreamNlpTtsHelper.Listener() {
         @Override
         public void onText(StreamNlpTtsHelper.OutTextSeg textSeg) {
-            Log.d(TAG, "streamNlpTts, onText, textSeg=" + textSeg);
+            FileLogger.d(TAG, "streamNlpTts, onText, textSeg=" + textSeg);
 
             startIncTTS(textSeg);
         }
 
         @Override
         public void onTtsData(JSONObject bizParamJson, byte[] audio) {
-            Log.d(TAG, "streamNlpTts, onTtsData, params=" + bizParamJson.toString());
+            FileLogger.d(TAG, "streamNlpTts, onTtsData, params=" + bizParamJson.toString());
         }
 
         @Override
         public void onFinish(String fullText) {
-            Log.d(TAG, "streamNlpTts, onFinish, fullText=" + fullText);
+            FileLogger.d(TAG, "streamNlpTts, onFinish, fullText=" + fullText);
         }
     };
 }
