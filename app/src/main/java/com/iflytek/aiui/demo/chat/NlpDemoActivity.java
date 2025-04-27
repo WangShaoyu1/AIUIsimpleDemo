@@ -30,9 +30,12 @@ import com.iflytek.aiui.demo.chat.utils.tts.StreamNlpTtsHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 /**
  * 语义理解demo。
@@ -43,13 +46,20 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
     private Toast mToast;
     private TextView mTimeSpentText;
-    private EditText mNlpText;
-
+    private EditText mNlpText;//语义理解结果，或者，大模型语义结果
+    private TextView mAsrText; //语音识别结果
+    private TextView mCbmTidyText;// 结构化语义结果，判断用户的具体意图，列表
+    private TextView mCbmSemanticText; // 结构化语义结果
+    private TextView mCbmToolPkText; // 智能体结果
+    private TextView mCbmRetrievalClassifyText; // 文档检索结果
     private AIUIAgent mAIUIAgent = null;
     private boolean mIsWakeupEnable = false;
     private int mAIUIState = AIUIConstant.STATE_IDLE;
 
     private String mSyncSid = "";
+
+    LinkedList<JSONObject> cbmSemanticList = new LinkedList<>(); // cbm_semantic,结构化语义用，有多条的时候
+    LinkedList<JSONObject> nlpList = new LinkedList<>();// nlp，有多条时候，需要有一个列表新增
 
     @SuppressLint("ShowToast")
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +90,12 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
         mStreamNlpTtsHelper = new StreamNlpTtsHelper(mStreamNlpTtsListener);
         mStreamNlpTtsHelper.setTextMinLimit(20);
+
+        mAsrText = findViewById(R.id.asr_result);
+        mCbmTidyText = findViewById(R.id.cbm_tidy_result);
+        mCbmSemanticText = findViewById(R.id.cbm_semantic_result);
+        mCbmToolPkText = findViewById(R.id.cbm_tool_pk_result);
+        mCbmRetrievalClassifyText = findViewById(R.id.cbm_retrieval_classify_result);
     }
 
     @Override
@@ -146,8 +162,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         try {
             JSONObject paramsJson = new JSONObject(params);//将字符串解析为JSON对象
 
-            mIsWakeupEnable = !"off".equals(paramsJson.optJSONObject("speech").optString(
-                    "wakeup_mode"));
+            mIsWakeupEnable = !"off".equals(paramsJson.optJSONObject("speech").optString("wakeup_mode"));
             if (mIsWakeupEnable) {
                 FucUtil.copyAssetFolder(this, "ivw", "/sdcard/AIUI/ivw");
             }
@@ -224,6 +239,10 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         FileLogger.i(TAG, "startVoiceNlp");
 
         mNlpText.setText("");
+        mAsrText.setText("");
+        mCbmSemanticText.setText("");
+        mCbmRetrievalClassifyText.setText("");
+        mCbmToolPkText.setText("");
 
         // 先发送唤醒消息，改变AIUI内部状态，只有唤醒状态才能接收语音输入
         // 默认为oneshot模式，即一次唤醒后就进入休眠。可以修改aiui_phone.cfg中speech参数的 interact_mode 为continuous以支持持续交互
@@ -236,8 +255,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
         // 个性化资源使用方法可参见http://doc.xfyun.cn/aiui_mobile/的用户个性化章节
         // 在输入参数中设置tag，则对应结果中也将携带该tag，可用于关联输入输出
         String params = "sample_rate=16000,data_type=audio,pers_param={\"uid\":\"\"},tag=audio-tag";
-        AIUIMessage startRecord = new AIUIMessage(AIUIConstant.CMD_START_RECORD, 0, 0, params,
-                null);
+        AIUIMessage startRecord = new AIUIMessage(AIUIConstant.CMD_START_RECORD, 0, 0, params, null);
 
         mAIUIAgent.sendMessage(startRecord);
     }
@@ -298,9 +316,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             String params = "vcn=x2_xiaojuan,volume=100,tag=tts-tag";
             byte[] textData = text.getBytes("utf-8");
 
-            AIUIMessage ttsMessage = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.START, 0,
-                    params,
-                    textData);
+            AIUIMessage ttsMessage = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.START, 0, params, textData);
             mAIUIAgent.sendMessage(ttsMessage);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -313,9 +329,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             return;
         }
 
-        AIUIMessage ttsMessage = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.CANCEL, 0,
-                "",
-                null);
+        AIUIMessage ttsMessage = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.CANCEL, 0, "", null);
         mAIUIAgent.sendMessage(ttsMessage);
     }
 
@@ -362,9 +376,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             // 用schema数据同步上传联系人
             // 注：数据同步请在连接服务器之后进行，否则可能失败
             // AIUI_V2服务上传schema要用SYNC_DATA_UPLOAD
-            AIUIMessage syncAthena = new AIUIMessage(AIUIConstant.CMD_SYNC,
-                    mIsAIUI_V2 ? AIUIConstant.SYNC_DATA_UPLOAD : AIUIConstant.SYNC_DATA_SCHEMA, 0,
-                    paramJson.toString(), syncData);
+            AIUIMessage syncAthena = new AIUIMessage(AIUIConstant.CMD_SYNC, mIsAIUI_V2 ? AIUIConstant.SYNC_DATA_UPLOAD : AIUIConstant.SYNC_DATA_SCHEMA, 0, paramJson.toString(), syncData);
 
             mAIUIAgent.sendMessage(syncAthena);
         } catch (JSONException e) {
@@ -391,8 +403,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             queryJson.put("sid", mSyncSid);
 
             // 发送同步数据状态查询消息，设置arg1为schema数据类型，params为查询字符串
-            AIUIMessage syncQuery = new AIUIMessage(AIUIConstant.CMD_QUERY_SYNC_STATUS,
-                    AIUIConstant.SYNC_DATA_SCHEMA, 0, queryJson.toString(), null);
+            AIUIMessage syncQuery = new AIUIMessage(AIUIConstant.CMD_QUERY_SYNC_STATUS, AIUIConstant.SYNC_DATA_SCHEMA, 0, queryJson.toString(), null);
             mAIUIAgent.sendMessage(syncQuery);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -433,9 +444,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             // 用schema数据同步上传联系人
             // 注：数据同步请在连接服务器之后进行，否则可能失败
             // AIUI_V2服务上传要用SYNC_DATA_UPLOAD
-            AIUIMessage syncAthena = new AIUIMessage(AIUIConstant.CMD_SYNC,
-                    AIUIConstant.SYNC_DATA_DOWNLOAD, 0,
-                    paramJson.toString(), syncData);
+            AIUIMessage syncAthena = new AIUIMessage(AIUIConstant.CMD_SYNC, AIUIConstant.SYNC_DATA_DOWNLOAD, 0, paramJson.toString(), syncData);
 
             mAIUIAgent.sendMessage(syncAthena);
         } catch (JSONException e) {
@@ -450,10 +459,10 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
     private String mCurTtsSid = "";
 
     private final AIUIListener mAIUIListener = new AIUIListener() {
+        @SuppressLint("SetTextI18n")
         @Override
         public void onEvent(AIUIEvent event) {
             FileLogger.i(TAG, "onEvent, eventType=" + event.eventType);
-
             switch (event.eventType) {
                 case AIUIConstant.EVENT_CONNECTED_TO_SERVER:
                     showTip("已连接服务器");
@@ -465,6 +474,11 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
                 case AIUIConstant.EVENT_WAKEUP:
                     showTip("进入识别状态");
+                    Log.i(TAG, event.info);
+                    FileLogger.i(TAG, event.info);
+                    // 重新唤醒后，清空这两个变量
+                    cbmSemanticList.clear();
+                    nlpList.clear();
                     break;
 
                 case AIUIConstant.EVENT_RESULT: {
@@ -479,20 +493,17 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                         // 也可以从Json结果中看到
                         String sid = event.data.getString("sid");
                         String tag = event.data.getString("tag");
+                        String cnt_id = content.getString("cnt_id");
 
                         if (content.has("cnt_id") && !"tts".equals(sub)) {
-                            String cnt_id = content.getString("cnt_id");
-                            String cntStr = new String(event.data.getByteArray(cnt_id), "utf-8");
+                            String cntStr = new String(event.data.getByteArray(cnt_id), "utf-8");// 这个很关键
+                            JSONObject cntJson = new JSONObject(cntStr);
 
                             // 打印识别结果到日志
-                            FileLogger.i(TAG, "onEvent, eventType=" + event.eventType);
-                            FileLogger.i(TAG, "sub = " + sub);
-                            FileLogger.i(TAG, "sid = " + sid);
-                            FileLogger.i(TAG, "tag = " + tag);
+                            FileLogger.i(TAG, "sub = " + sub + ";" + "content = " + content + ";" + "cnt_id = " + cnt_id + ";" + "sid = " + sid + ";" + "tag = " + tag);
                             FileLogger.i(TAG, "cntStr = " + cntStr);
 
-                            // 获取从数据发送完到获取结果的耗时，单位：ms
-                            // 也可以通过键名"bos_rslt"获取从开始发送数据到获取结果的耗时
+                            // 获取从数据发送完到获取结果的耗时，单位：ms；也可以通过键名"bos_rslt"获取从开始发送数据到获取结果的耗时
                             long eosRsltTime = event.data.getLong("eos_rslt", -1);
                             mTimeSpentText.setText(sub + ":" + eosRsltTime + "ms");
 
@@ -500,25 +511,109 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                                 return;
                             }
 
-                            JSONObject cntJson = new JSONObject(cntStr);
 
-                            if (mNlpText.getLineCount() > 1000) {
-                                mNlpText.setText("");
+                            if ("iat".equals(sub)) {
+                                // 获取语音识别内容,并显示出来, 处理 mAseResult的内容
+                                JSONObject textJson;
+                                textJson = cntJson.optJSONObject("text");
+
+                                if (textJson != null && !textJson.optBoolean("ls")) {
+                                    mAsrText.setText(processTextObject(cntJson));
+                                }
+
+                                FileLogger.i(TAG, "asr_result: " + processTextObject(cntJson));
                             }
 
-                            mNlpText.append("\n");
-                            mNlpText.append(cntJson.toString());
-                            mNlpText.setSelection(mNlpText.getText().length());
+                            if ("cbm_tidy".equals(sub)) {
+                                // 语义规整：进行关键信息提取和意图拆分，判断用户一次说了多少个意图
+                                JSONObject cbmTidyJson = new JSONObject(cntJson.optJSONObject("cbm_tidy").optString("text"));
+                                String query = cbmTidyJson.getString("query");
+                                JSONArray intentArray = cbmTidyJson.getJSONArray("intent");
+                                String intents = "";
+
+                                for (int i = 0; i < intentArray.length(); i++) {
+                                    JSONObject item = intentArray.getJSONObject(i);
+                                    intents += item.optString("value") + "\r\n";
+                                }
+
+                                mCbmTidyText.setText("query：" + query + "\r\n" + "意图：" + intents);
+
+                                FileLogger.i(TAG, "cbm_tidy_result: " + "query：" + query + "；意图：" + intents);
+                            }
+
+                            if ("cbm_semantic".equals(sub)) {
+                                // 结构化语义结果
+                                JSONObject cbmSemanticJson = new JSONObject(cntJson.optJSONObject("cbm_semantic").optString("text"));
+                                String result = cbmSemanticJson.optJSONObject("answer").optString("text");
+                                JSONObject cbmMetaJson = new JSONObject(cntJson.optJSONObject("cbm_meta").optString("text")).optJSONObject("cbm_semantic");
+                                Integer intentIndex = cbmMetaJson.optInt("intent"); // 第几个意图
+                                JSONObject temp = new JSONObject();
+                                temp.put("intentIndex", intentIndex);
+                                temp.put("result", result);
+
+                                cbmSemanticList.add(temp); // 增加元素
+
+                                // 按照意图序号排序
+                                Collections.sort(cbmSemanticList, (a, b) -> {
+                                    int diff = a.optInt("intentIndex") - b.optInt("intentIndex");
+                                    Log.i(TAG, "比较结果-cbm_semantic: " + diff); // 确保打印
+                                    return diff;
+                                });
+
+                                mCbmSemanticText.setText(String.valueOf(cbmSemanticList));
+                                mCbmSemanticText.append("\n");
+
+                                FileLogger.i(TAG, "cbm_semantic_result: " + String.valueOf(cbmSemanticList));
+                            }
+
+                            if ("cbm_tool_pk".equals(sub)) {
+                                // 智能体结果
+                                JSONObject cbmToolPkJson = new JSONObject(cntJson.optJSONObject("cbm_tool_pk").optString("text"));
+
+                                mCbmToolPkText.setText("cbm_tool_pk: " + String.valueOf(cbmToolPkJson));
+
+                                FileLogger.i(TAG, "cbm_tool_pk_result: " + String.valueOf(cbmToolPkJson));
+                            }
+
+                            if ("cbm_retrieval_classify".equals(sub)) {
+                                // 文档检索结果
+                                JSONObject cbmRetrievalClassifyJson = new JSONObject(cntJson.optJSONObject("cbm_retrieval_classify").optString("text"));
+                                mCbmRetrievalClassifyText.setText("cbm_retrieval_classify_result" + String.valueOf(cbmRetrievalClassifyJson));
+
+                                FileLogger.i(TAG, "cbm_retrieval_classify: " + String.valueOf(cbmRetrievalClassifyJson));
+                            }
 
                             if ("nlp".equals(sub)) {
-                                // 解析得到语义结果
-                                String resultStr = cntJson.optString("intent");
-                                FileLogger.i(TAG, resultStr);
+                                // 大模型语义结果，分两种情况，有没有在AIUI后台开启：星火大模型。有可能nlp_origin字段为cbm_semantic，注意区分
+                                JSONObject nlpJson = cntJson.optJSONObject("nlp");
+                                String textJsonString = nlpJson.optString("text");
+                                String result = "";
+                                boolean isPureText = !textJsonString.contains("intent");
+                                result = isPureText ? textJsonString : (new JSONObject(textJsonString)).optJSONObject("intent").optJSONObject("answer").optString("text");
+
+                                JSONObject cbmMetaJson = new JSONObject(cntJson.optJSONObject("cbm_meta").optString("text")).optJSONObject("nlp");
+                                Integer intentIndex = cbmMetaJson.optInt("intent"); // 第几个意图
+                                JSONObject temp = new JSONObject();
+                                temp.put("intentIndex", intentIndex);
+                                temp.put("result", result);
+                                
+                                nlpList.add(temp); // 增加元素
+
+                                // 按照意图序号排序
+                                Collections.sort(nlpList, (a, b) -> {
+                                    int diff = a.optInt("intentIndex") - b.optInt("intentIndex");
+                                    Log.i(TAG, "比较结果-nlp: " + diff); // 确保打印
+                                    return diff;
+                                });
+
+                                mNlpText.setText(String.valueOf(nlpList));
+                                mNlpText.append("\n");
+
+                                FileLogger.i(TAG, "nlpResult: " + result);
                             }
 
-                            mNlpText.append("\n");
-                        }
 
+                        }
                         if ("tts".equals(sub)) {
                             if (!mCurTtsSid.equals(sid)) {
                                 mCurTtsSid = sid;
@@ -526,16 +621,12 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                             }
 
                             int dts = content.getInt("dts");
-                            String cnt_id = content.getString("cnt_id");
                             byte[] audio = event.data.getByteArray(cnt_id);
 
                             assert audio != null;
                             if (audio.length > 0) {
                                 if (!mIsValidTTSAudioArrived) {
                                     mIsValidTTSAudioArrived = true;
-
-                                    long eosRsltTime = event.data.getLong("eos_rslt", -1);
-                                    mTimeSpentText.setText(sub + ":" + eosRsltTime + "ms");
                                 }
                             }
 
@@ -634,8 +725,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                             case AIUIConstant.SYNC_DATA_DOWNLOAD: {
                                 if (AIUIConstant.SUCCESS == retCode) {
                                     String base64 = event.data.getString("text", "");
-                                    String content = new String(Base64.decode(base64,
-                                            Base64.DEFAULT));
+                                    String content = new String(Base64.decode(base64, Base64.DEFAULT));
                                     String text = "下载到的实体内容：\n" + content;
 
                                     mNlpText.setText(text);
@@ -699,8 +789,7 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
 
             byte[] textData = seg.mText.getBytes("utf-8");
 
-            AIUIMessage startTTS = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.START, 0,
-                    params, textData);
+            AIUIMessage startTTS = new AIUIMessage(AIUIConstant.CMD_TTS, AIUIConstant.START, 0, params, textData);
             mAIUIAgent.sendMessage(startTTS);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -727,4 +816,27 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
             FileLogger.d(TAG, "streamNlpTts, onFinish, fullText=" + fullText);
         }
     };
+
+
+    private String processTextObject(JSONObject textObject) {
+        try {
+            StringBuilder resultBuilder = new StringBuilder();
+            JSONArray wsArray = textObject.optJSONObject("text").getJSONArray("ws");
+
+            for (int i = 0; i < wsArray.length(); i++) {
+                JSONObject wsItem = wsArray.getJSONObject(i); // getJSONObject，也可使用optJSONObject来替代，如果类型不匹配，不会抛出异常，返回null
+                JSONArray cwArray = wsItem.getJSONArray("cw");// getJSONArray，也可使用optJSONArray来替代，如果类型不匹配，不会抛出异常，返回null
+
+                for (int j = 0; j < cwArray.length(); j++) {
+                    JSONObject cwItem = cwArray.getJSONObject(j);
+                    resultBuilder.append(cwItem.getString("w"));
+                }
+            }
+
+            return resultBuilder.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return ""; // 返回空字符串表示处理失败
+        }
+    }
 }

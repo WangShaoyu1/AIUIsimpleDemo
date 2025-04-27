@@ -2,54 +2,134 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:padding="10dip" >
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="10dip">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dip"
-        android:layout_marginBottom="2dip"
         android:layout_gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:layout_margin="0dip"
+        android:layout_marginBottom="2dip"
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dip"
             android:layout_gravity="center"
+            android:layout_margin="5dip"
             android:text="AIUI语义交互"
-            android:textSize="30sp" />
+            android:textSize="24sp" />
 
         <TextView
+            android:id="@+id/txt_time_spent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/txt_time_spent"
             android:text=""
-            android:textColor="#00ff00"/>
+            android:textColor="#00ff00" />
+
+
     </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/asr_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#e8e8e8"
+            android:gravity="center"
+            android:text=" "
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/cbm_tidy_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#d8d8a8"
+            android:gravity="center"
+            android:minHeight="50dp"
+            android:text=""
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/cbm_semantic_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#28f8f8"
+            android:gravity="center"
+            android:minHeight="75dp"
+            android:text=""
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/cbm_tool_pk_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#d8f888"
+            android:gravity="center"
+            android:minHeight="50dp"
+            android:text=""
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/cbm_retrieval_classify_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#38d8f8"
+            android:gravity="center"
+            android:minHeight="50dp"
+            android:text=""
+            android:textSize="12dp" />
+    </LinearLayout>
 
     <EditText
         android:id="@+id/nlp_text"
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:gravity="top|left"
+        android:gravity="center"
+        android:hint=""
         android:paddingBottom="40dip"
-        android:textSize="20sp"
-        android:hint=""/>
+        android:textSize="14dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft ="10dip"
-        android:layout_marginRight ="10dip"
-        android:layout_marginBottom="2dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
         android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/nlp_create"
             android:layout_width="0dip"
@@ -70,11 +150,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft ="10dip"
-        android:layout_marginRight ="10dip"
-        android:layout_marginBottom="2dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
         android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/nlp_start"
             android:layout_width="0dip"
@@ -82,7 +162,7 @@
             android:layout_weight="1"
             android:text="开始录音"
             android:textSize="20sp" />
-        
+
         <Button
             android:id="@+id/nlp_stop_rec"
             android:layout_width="0dip"
@@ -91,40 +171,41 @@
             android:text="停止录音"
             android:textSize="20sp" />
     </LinearLayout>
-    
-     <Button
-            android:id="@+id/text_nlp_start"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="文本语义"
-            android:layout_marginLeft ="10dip"
-            android:layout_marginRight ="10dip"
-        	android:layout_marginBottom="2dip"
-            android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/text_nlp_start"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:text="文本语义"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft ="10dip"
-        android:layout_marginRight ="10dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
         android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone">
+
         <Button
             android:id="@+id/tts_start"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dip"
             android:layout_weight="1"
             android:text="开始合成"
-            android:layout_marginBottom="2dip"
             android:textSize="20sp" />
 
         <Button
             android:id="@+id/tts_stop"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dip"
             android:layout_weight="1"
             android:text="停止合成"
-            android:layout_marginBottom="2dip"
             android:textSize="20sp" />
 
     </LinearLayout>
@@ -132,26 +213,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft ="10dip"
-        android:layout_marginRight ="10dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
         android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:visibility="gone">
+
         <Button
             android:id="@+id/sync_contacts"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dip"
             android:layout_weight="1"
             android:text="上传联系人"
-            android:layout_marginBottom="2dip"
             android:textSize="20sp" />
 
         <Button
             android:id="@+id/sync_query"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dip"
             android:layout_weight="1"
             android:text="打包查询"
-            android:layout_marginBottom="2dip"
             android:textSize="20sp" />
 
     </LinearLayout>
