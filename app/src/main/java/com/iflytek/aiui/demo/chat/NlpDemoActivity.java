@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /**
  * 语义理解demo。
@@ -587,16 +588,18 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                                 // 大模型语义结果，分两种情况，有没有在AIUI后台开启：星火大模型。有可能nlp_origin字段为cbm_semantic，注意区分
                                 JSONObject nlpJson = cntJson.optJSONObject("nlp");
                                 String textJsonString = nlpJson.optString("text");
-                                String result = "";
+                                String result = ""; // 每次流式返回的nlp内容
+                                String allResultStr = ""; // 处理拼接后的字符串
                                 boolean isPureText = !textJsonString.contains("intent");
                                 result = isPureText ? textJsonString : (new JSONObject(textJsonString)).optJSONObject("intent").optJSONObject("answer").optString("text");
 
                                 JSONObject cbmMetaJson = new JSONObject(cntJson.optJSONObject("cbm_meta").optString("text")).optJSONObject("nlp");
                                 Integer intentIndex = cbmMetaJson.optInt("intent"); // 第几个意图
+
                                 JSONObject temp = new JSONObject();
                                 temp.put("intentIndex", intentIndex);
                                 temp.put("result", result);
-                                
+
                                 nlpList.add(temp); // 增加元素
 
                                 // 按照意图序号排序
@@ -606,7 +609,14 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                                     return diff;
                                 });
 
-                                mNlpText.setText(String.valueOf(nlpList));
+                                // 将nlpList中的result字段拼接起来
+                                allResultStr = nlpList.stream()
+                                        .filter(obj -> obj.has("result"))
+                                        .map(obj -> obj.optString("result"))
+                                        .collect(Collectors.joining());
+
+                                mNlpText.setText(allResultStr);
+                                // mNlpText.setText( String.valueOf(nlpList));
                                 mNlpText.append("\n");
 
                                 FileLogger.i(TAG, "nlpResult: " + result);

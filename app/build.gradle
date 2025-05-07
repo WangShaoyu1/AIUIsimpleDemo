@@ -8,7 +8,7 @@ android {
     buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId "com.iflytek.aiui.demo.simple"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 36
         versionName "1.5.5"

@@ -22,7 +22,8 @@ public class FileLogger {
     private static final String TAG = "FileLogger";
     private static final String LOG_FILE_NAME = "aiui_log.txt";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-    private static final String SERVER_URL = "http://192.168.1.22:5002/log"; // Python 服务器地址
+//    private static final String SERVER_URL = "http://192.168.43.6:5002/log"; // Python 服务器地址
+    private static final String SERVER_URL = "http://172.19.55.127:5002/log"; // Python 服务器地址
     private static final OkHttpClient client = new OkHttpClient();
 
     public static void log_local(String tag, String message) {
