@@ -593,32 +593,38 @@ public class NlpDemoActivity extends Activity implements OnClickListener {
                                 boolean isPureText = !textJsonString.contains("intent");
                                 result = isPureText ? textJsonString : (new JSONObject(textJsonString)).optJSONObject("intent").optJSONObject("answer").optString("text");
 
-                                JSONObject cbmMetaJson = new JSONObject(cntJson.optJSONObject("cbm_meta").optString("text")).optJSONObject("nlp");
-                                Integer intentIndex = cbmMetaJson.optInt("intent"); // 第几个意图
+                                // 有可能返回的信息中不含有cbm_meta字段。在配置的唤醒词是 免唤醒入口词的时候，并且关闭了 星火大模型
+                                if (cntJson.optJSONObject("cbm_meta") != null) {
 
-                                JSONObject temp = new JSONObject();
-                                temp.put("intentIndex", intentIndex);
-                                temp.put("result", result);
 
-                                nlpList.add(temp); // 增加元素
+                                    JSONObject cbmMetaJson = new JSONObject(cntJson.optJSONObject("cbm_meta").optString("text")).optJSONObject("nlp");
+                                    Integer intentIndex = cbmMetaJson.optInt("intent"); // 第几个意图
 
-                                // 按照意图序号排序
-                                Collections.sort(nlpList, (a, b) -> {
-                                    int diff = a.optInt("intentIndex") - b.optInt("intentIndex");
-                                    Log.i(TAG, "比较结果-nlp: " + diff); // 确保打印
-                                    return diff;
-                                });
+                                    JSONObject temp = new JSONObject();
+                                    temp.put("intentIndex", intentIndex);
+                                    temp.put("result", result);
 
-                                // 将nlpList中的result字段拼接起来
-                                allResultStr = nlpList.stream()
-                                        .filter(obj -> obj.has("result"))
-                                        .map(obj -> obj.optString("result"))
-                                        .collect(Collectors.joining());
+                                    nlpList.add(temp); // 增加元素
 
-                                mNlpText.setText(allResultStr);
-                                // mNlpText.setText( String.valueOf(nlpList));
-                                mNlpText.append("\n");
+                                    // 按照意图序号排序
+                                    Collections.sort(nlpList, (a, b) -> {
+                                        int diff = a.optInt("intentIndex") - b.optInt("intentIndex");
+                                        Log.i(TAG, "比较结果-nlp: " + diff); // 确保打印
+                                        return diff;
+                                    });
 
+                                    // 将nlpList中的result字段拼接起来
+                                    allResultStr = nlpList.stream()
+                                            .filter(obj -> obj.has("result"))
+                                            .map(obj -> obj.optString("result"))
+                                            .collect(Collectors.joining());
+
+                                    mNlpText.setText(allResultStr);
+                                    // mNlpText.setText( String.valueOf(nlpList));
+                                    mNlpText.append("\n");
+                                }else{
+                                    mNlpText.setText(result);
+                                }
                                 FileLogger.i(TAG, "nlpResult: " + result);
                             }
 

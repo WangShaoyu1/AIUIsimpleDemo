@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AIUISimpleDemo</string>
+    <string name="app_name">AIUI简单示例</string>
     <string name="voice_clone_instruction">使用说明：\n
         1.录制一段20~40秒的音频保存到文件，格式为24KHz采样，16bit编码的PCM；\n
         2.调用注册接口将音频上传到云端注册，注册成功后会返回一个对应的声音res_id；\n
